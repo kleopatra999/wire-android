@@ -48,6 +48,8 @@ import android.view.animation.AnimationUtils;
 
 import java.lang.reflect.Field;
 
+import static android.R.attr.width;
+
 public class ViewUtils {
 
     private static final int DEFAULT_CHILD_ANIMATION_DURATION = 350;
@@ -303,13 +305,23 @@ public class ViewUtils {
     }
 
     public static void setHeight(View v, int height) {
-        ((ViewGroup.MarginLayoutParams) v.getLayoutParams()).height = height;
-        v.invalidate();
+        ViewGroup.LayoutParams params = v.getLayoutParams();
+        if (params == null) {
+            params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, height);
+        } else {
+            params.height = height;
+        }
+        v.setLayoutParams(params);
+
     }
 
     public static void setWidth(View v, int width) {
         ViewGroup.LayoutParams params = v.getLayoutParams();
-        params.width = width;
+        if (params == null) {
+            params = new ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        } else {
+            params.width = width;
+        }
         v.setLayoutParams(params);
     }
 

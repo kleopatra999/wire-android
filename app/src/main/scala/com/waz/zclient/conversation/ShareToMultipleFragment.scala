@@ -335,11 +335,8 @@ class ShareToMultipleAdapter(context: Context, filter: Signal[String])(implicit 
     }
   }
 
-  override def onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = {
-    val view = new SelectableConversationRow(context, checkBoxListener)
-    parent.addView(view)
-    SelectableConversationRowViewHolder(view)
-  }
+  override def onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+    SelectableConversationRowViewHolder(new SelectableConversationRow(context, checkBoxListener))
 
   override def getItemId(position: Int): Long = getItem(position).fold(0)(_.id.hashCode()).toLong
 

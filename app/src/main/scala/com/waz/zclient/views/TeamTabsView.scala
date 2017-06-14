@@ -27,6 +27,7 @@ import com.waz.ZLog._
 import com.waz.model._
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, EventStream, Signal}
+import com.waz.utils.returning
 import com.waz.zclient.controllers.TeamsAndUserController
 import com.waz.zclient.{Injectable, Injector, ViewHelper}
 
@@ -99,16 +100,14 @@ class TeamTabsAdapter(context: Context)(implicit injector: Injector, eventContex
     }
   }
 
-  override def onCreateViewHolder(parent: ViewGroup, viewType: Int) = {
-    val view = new TeamTabButton(context)
-    view.setOnClickListener(new OnClickListener {
-      override def onClick(v: View) = {
-        onItemClick ! v.getTag.asInstanceOf[Either[UserData, TeamData]]
-      }
+  override def onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+    new TeamTabViewHolder(returning(new TeamTabButton(context)) {
+      _.setOnClickListener(new OnClickListener {
+        override def onClick(v: View) = {
+          onItemClick ! v.getTag.asInstanceOf[Either[UserData, TeamData]]
+        }
+      })
     })
-    parent.addView(view)
-    new TeamTabViewHolder(view)
-  }
 
   def getItem(position: Int): Option[Either[(UserData, Int), (TeamData, Int)]] = {
     position match {

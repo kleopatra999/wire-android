@@ -29,6 +29,7 @@ import com.waz.service.ZMessaging
 import com.waz.service.messages.MessageAndLikes
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, Signal}
+import com.waz.utils.returning
 import com.waz.zclient.controllers.global.SelectionController
 import com.waz.zclient.messages.MessageView.MsgBindOptions
 import com.waz.zclient.messages.RecyclerCursor
@@ -89,11 +90,9 @@ class SearchAdapter()(implicit context: Context, injector: Injector, eventContex
   }
 
   override def onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = {
-    val view = new TextSearchResultRowView(context)
-    parent.addView(view)
-    val viewHolder = new SearchResultRowViewHolder(view)
-    viewHolder.setSearchQuerySignal(contentSearchQuery)
-    viewHolder
+    returning(new SearchResultRowViewHolder(new TextSearchResultRowView(context))) {
+      _.setSearchQuerySignal(contentSearchQuery)
+    }
   }
 
   override def getItemId(position: Int): Long = message(position).message.id.str.hashCode

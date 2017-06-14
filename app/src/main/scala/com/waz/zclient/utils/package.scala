@@ -23,10 +23,14 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.support.annotation.StyleableRes
 import android.support.v4.content.ContextCompat
+import android.text.Layout
 import android.util.AttributeSet
 import android.view.View._
+import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.{View, ViewGroup}
 import android.widget.SeekBar
+import com.waz.utils.returning
 import com.waz.zclient.ui.utils.ResourceUtils
 import com.waz.zclient.ui.views.OnDoubleClickListener
 
@@ -75,6 +79,19 @@ package object utils {
     def onLongClick(f: => Boolean): Unit = view.setOnLongClickListener(new OnLongClickListener {
       override def onLongClick(v: View): Boolean = f
     })
+
+    def setWidthAndHeight(w: Option[Int] = None, h: Option[Int] = None) = {
+      view.setLayoutParams(Option(view.getLayoutParams) match {
+        case Some(p) =>
+          p.width = w.getOrElse(p.width)
+          p.height = h.getOrElse(p.height)
+          p
+        case _ =>
+          new LayoutParams(w.getOrElse(WRAP_CONTENT), h.getOrElse(WRAP_CONTENT))
+      })
+    }
+    def setWidth(w: Int): Unit = setWidthAndHeight(w = Some(w))
+    def setHeight(h: Int): Unit = setWidthAndHeight(h = Some(h))
   }
 
   implicit class RichSeekBar(val bar: SeekBar) extends AnyVal {

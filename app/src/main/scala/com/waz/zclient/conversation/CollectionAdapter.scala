@@ -189,14 +189,10 @@ class CollectionAdapter(viewDim: Signal[Dim2])(implicit context: Context, inject
       case otherType => CollectionItemViewHolder(inflateCollectionView(otherType, parent))
     }
 
-  private def inflateCollectionImageView(parent: ViewGroup): CollectionImageView = {
-    val view = new CollectionImageView(context)
-    parent.addView(view)
-    view
-  }
+  private def inflateCollectionImageView(parent: ViewGroup) = new CollectionImageView(context)
 
-  private def inflateCollectionView(viewType: Int, parent: ViewGroup): CollectionNormalItemView ={
-    val view = viewType match {
+  private def inflateCollectionView(viewType: Int, parent: ViewGroup) = {
+    viewType match {
       case CollectionAdapter.VIEW_TYPE_FILE =>
         ViewHelper.inflate[CollectionNormalItemView](R.layout.collection_file_asset, parent, addToParent = false)
       case CollectionAdapter.VIEW_TYPE_LINK_PREVIEW =>
@@ -206,8 +202,6 @@ class CollectionAdapter(viewDim: Signal[Dim2])(implicit context: Context, inject
       case _ =>
         returning(null.asInstanceOf[CollectionNormalItemView])(_ => error(s"Unexpected ViewType: $viewType"))
     }
-    parent.addView(view)
-    view
   }
 
   def isFullSpan(position: Int): Boolean = {

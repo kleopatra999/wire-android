@@ -122,7 +122,9 @@
     <issue id="UseValueOf" severity="error" />
     <issue id="JavascriptInterface" severity="error" />
     <issue id="LabelFor" severity="error" />
-    <issue id="InconsistentLayout" severity="error" />
+    <issue id="InconsistentLayout" severity="error">
+        <ignore path="*notification_template_custom_big.xml" />
+    </issue>
     <issue id="InflateParams" severity="error" />
     <issue id="SimpleDateFormat" severity="error" />
     <issue id="DefaultLocale" severity="error" />

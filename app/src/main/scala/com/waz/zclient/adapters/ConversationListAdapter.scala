@@ -21,14 +21,15 @@ import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.View.OnLongClickListener
 import android.view.{View, ViewGroup}
-import com.waz.ZLog
 import com.waz.ZLog.ImplicitTag._
+import com.waz.ZLog.{error, verbose}
 import com.waz.api.IConversation
 import com.waz.model.ConversationData.ConversationType
 import com.waz.model._
 import com.waz.service.ZMessaging
 import com.waz.threading.Threading
 import com.waz.utils.events.{EventContext, EventStream, Signal}
+import com.waz.utils.returning
 import com.waz.zclient.adapters.ConversationListAdapter._
 import com.waz.zclient.controllers.TeamsAndUserController
 import com.waz.zclient.pages.main.conversationlist.views.ConversationCallback
@@ -50,14 +51,14 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
     teamOrUser <- teamAndUsersController.currentTeamOrUser
   } yield
     conversations.conversations
-      .filter{ conversationData =>
+      .filter { conversationData =>
         mode.filter(conversationData) && mode.teamsPredicate(conversationData, teamOrUser, userTeams)
       }
       .toSeq
       .sorted(mode.sort)
 
-  var conversations: Seq[ConversationData] = Seq.empty
-  var incomingRequests: (Seq[ConversationData], Seq[UserId]) = (Seq.empty, Seq.empty)
+  var conversations = Seq.empty[ConversationData]
+  var incomingRequests = (Seq.empty[ConversationData], Seq.empty[UserId])
 
   lazy val incomingRequestsSignal = for {
     z <- zms
@@ -98,7 +99,7 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
     holder match {
       case normalViewHolder: NormalConversationRowViewHolder =>
         getItem(position).fold {
-          ZLog.error(s"Conversation not found at position: $position")
+          error(s"Conversation not found at position: $position")
         } { item =>
           normalViewHolder.bind(item)
         }
@@ -110,47 +111,42 @@ class ConversationListAdapter(context: Context)(implicit injector: Injector, eve
   override def onCreateViewHolder(parent: ViewGroup, viewType: Int) = {
     viewType match {
       case NormalViewType =>
-        val row = new NormalConversationListRow(context)
-        parent.addView(row)
-        row.setAlpha(1f)
-        row.setMaxAlpha(maxAlpha)
-        row.setOnClickListener(new View.OnClickListener {
-          override def onClick(view: View): Unit = {
-            Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationClick ! _ }
-          }
+        NormalConversationRowViewHolder(returning(new NormalConversationListRow(context)) { r =>
+          r.setAlpha(1f)
+          r.setMaxAlpha(maxAlpha)
+          r.setOnClickListener(new View.OnClickListener {
+            override def onClick(view: View): Unit = {
+              Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationClick ! _ }
+            }
+          })
+          r.setOnLongClickListener(new OnLongClickListener {
+            override def onLongClick(view: View): Boolean = {
+              Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
+              true
+            }
+          })
+          r.setConversationCallback(new ConversationCallback {
+            override def onConversationListRowLongClicked(conversation: IConversation, view: View) = {
+              Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
+            }
+            override def onConversationListRowSwiped(conversation: IConversation, view: View) = {
+              Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
+            }
+          })
         })
-        row.setOnLongClickListener(new OnLongClickListener {
-          override def onLongClick(view: View): Boolean = {
-            Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
-            true
-          }
-        })
-        row.setConversationCallback(new ConversationCallback {
-          override def onConversationListRowLongClicked(conversation: IConversation, view: View) = {
-            Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
-          }
-          override def onConversationListRowSwiped(conversation: IConversation, view: View) = {
-            Option(view.getTag.asInstanceOf[ConversationData]).foreach { onConversationLongClick ! _ }
-          }
-        })
-        NormalConversationRowViewHolder(row)
       case IncomingViewType =>
-        val row = new IncomingConversationListRow(context)
-        parent.addView(row)
-        row.setOnClickListener(new View.OnClickListener {
-          override def onClick(view: View): Unit = {
-            incomingRequests._1.headOption.foreach(onConversationClick ! _ )
-          }
+        IncomingConversationRowViewHolder(returning(new IncomingConversationListRow(context)) { r =>
+          r.setOnClickListener(new View.OnClickListener {
+            override def onClick(view: View): Unit = {
+              incomingRequests._1.headOption.foreach(onConversationClick ! _ )
+            }
+          })
         })
-        IncomingConversationRowViewHolder(row)
     }
-
   }
 
-
-  override def getItemId(position: Int): Long = {
+  override def getItemId(position: Int): Long =
     getItem(position).fold(position)(_.id.str.hashCode)
-  }
 
   override def getItemViewType(position: Int): Int =
     if (position == 0 && incomingRequests._2.nonEmpty)

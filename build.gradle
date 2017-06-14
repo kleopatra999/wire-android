@@ -72,11 +72,11 @@ ext {
 
     checkstyleVersion = '6.18'
     pmdVersion = '5.4.1'
-    supportLibVersion = '24.0.0'
-    playServicesVersion = '10.0.1'
+    supportLibVersion = '25.4.0'
+    playServicesVersion = '11.0.0'
 
     audioVersion = System.getenv("AUDIO_VERSION") ?: '1.209.0@aar'
-    zMessagingDevVersionBase = '101.1548'
+    zMessagingDevVersionBase = '101.1554'
     zMessagingDevVersion = "${zMessagingDevVersionBase}@aar"
     // Release version number must be like this X.0(.Y)
     zMessagingReleaseVersion = System.getenv("ZMESSAGING_VERSION") ?: '101.1.369@aar'
@@ -171,6 +171,7 @@ allprojects {
         maven { url "https://dl.bintray.com/wire-android/snapshots" }
         maven { url "https://dl.bintray.com/wire-android/third-party" }
         maven { url "http://maven.localytics.com/public" }
+        maven { url 'https://maven.google.com' }
         mavenCentral()
     }
 }

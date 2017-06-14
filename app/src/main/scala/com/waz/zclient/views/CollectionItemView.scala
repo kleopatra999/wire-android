@@ -47,6 +47,7 @@ import com.waz.zclient.{R, ViewHelper}
 import org.threeten.bp.{LocalDateTime, ZoneId}
 import com.waz.ZLog.ImplicitTag._
 import com.waz.utils.wrappers.AndroidURIUtil
+import com.waz.zclient.utils.RichView
 
 trait CollectionItemView extends ViewHelper {
   protected lazy val civZms = inject[Signal[ZMessaging]]
@@ -134,8 +135,8 @@ class CollectionImageView(context: Context) extends AspectRatioImageView(context
 
   def setMessageData(messageData: MessageData, width: Int, color: Int) = {
     setAspectRatio(1)
-    ViewUtils.setWidth(this, width)
-    ViewUtils.setHeight(this, width)
+    this.setWidth(width)
+    this.setHeight(width)
     this.messageData ! messageData
   }
 }

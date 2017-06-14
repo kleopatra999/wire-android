@@ -27,6 +27,7 @@ import com.waz.model.otr.Client
 import com.waz.service.ZMessaging
 import com.waz.threading.Threading
 import com.waz.utils.events.Signal
+import com.waz.utils.returning
 import com.waz.zclient.adapters.ConversationListAdapter
 import com.waz.zclient.controllers.TeamsAndUserController
 import com.waz.zclient.controllers.global.AccentColorController
@@ -42,44 +43,47 @@ import com.waz.zclient.pages.main.pickuser.controller.IPickUserController
 import com.waz.zclient.pages.main.profile.ZetaPreferencesActivity
 import com.waz.zclient.tracking.GlobalTrackingController
 import com.waz.zclient.ui.text.TypefaceTextView
-import com.waz.zclient.ui.utils.ResourceUtils
-import com.waz.zclient.utils.ViewUtils
+import com.waz.zclient.utils.ContextUtils._
+import com.waz.zclient.utils.{RichView, ViewUtils}
 import com.waz.zclient.views.conversationlist.{ArchiveTopToolbar, ConversationListTopToolbar, NormalTopToolbar}
 import com.waz.zclient.{BaseActivity, FragmentHelper, OnBackPressedListener, R}
-import com.waz.zclient.utils.RichView
 
 abstract class ConversationListFragment extends BaseFragment[ConversationListFragment.Container] with FragmentHelper {
+
+  implicit lazy val context = getContext
 
   val layoutId: Int
   lazy val teamsAndUsersController = inject[TeamsAndUserController]
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) = {
     val view = inflater.inflate(layoutId, container, false)
-    val conversationListView = ViewUtils.getView(view, R.id.conversation_list_view).asInstanceOf[SwipeListView]
-    val adapter = new ConversationListAdapter(getContext)
     val topToolbar = ViewUtils.getView(view, R.id.conversation_list_top_toolbar).asInstanceOf[ConversationListTopToolbar]
 
-    conversationListView.setLayoutManager(new LinearLayoutManager(getContext))
-    conversationListView.setAdapter(adapter)
-    conversationListView.setAllowSwipeAway(true)
-    conversationListView.setOverScrollMode(View.OVER_SCROLL_NEVER)
+    val adapter = returning(new ConversationListAdapter(getContext)) { a =>
+      a.setMaxAlpha(getResourceFloat(R.dimen.list__swipe_max_alpha))
+      a.currentMode.on(Threading.Ui) { mode =>
+        topToolbar.title.setText(mode.nameId)
+      }
+    }
 
-    teamsAndUsersController.currentTeamOrUser.on(Threading.Ui) { _ =>
-      conversationListView.scrollToPosition(0)
+    val conversationListView = returning(ViewUtils.getView(view, R.id.conversation_list_view).asInstanceOf[SwipeListView]) { rv =>
+      rv.setLayoutManager(new LinearLayoutManager(getContext))
+      rv.setAdapter(adapter)
+      rv.setAllowSwipeAway(true)
+      rv.setOverScrollMode(View.OVER_SCROLL_NEVER)
+      rv.addOnScrollListener(new RecyclerView.OnScrollListener {
+        override def onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = {
+          topToolbar.setScrolledToTop(!recyclerView.canScrollVertically(-1))
+        }
+      })
     }
 
     adapter.onConversationClick { handleItemClick }
     adapter.onConversationLongClick { handleItemLongClick(_, conversationListView) }
-    adapter.setMaxAlpha(ResourceUtils.getResourceFloat(getResources, R.dimen.list__swipe_max_alpha))
-    adapter.currentMode.on(Threading.Ui) { mode =>
-      topToolbar.title.setText(mode.nameId)
-    }
 
-    conversationListView.addOnScrollListener(new RecyclerView.OnScrollListener {
-      override def onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = {
-        topToolbar.setScrolledToTop(!recyclerView.canScrollVertically(-1))
-      }
-    })
+    teamsAndUsersController.currentTeamOrUser.on(Threading.Ui) { _ =>
+      conversationListView.scrollToPosition(0)
+    }
 
     init(view, adapter)
 
