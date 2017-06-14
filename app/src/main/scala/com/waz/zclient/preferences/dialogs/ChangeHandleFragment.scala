@@ -19,7 +19,6 @@ package com.waz.zclient.preferences.dialogs
 
 import java.util.Locale
 
-import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.TextInputLayout
 import android.support.v4.app.DialogFragment
@@ -38,7 +37,6 @@ import com.waz.threading.Threading
 import com.waz.utils.events.Signal
 import com.waz.utils.returning
 import com.waz.zclient.core.controllers.tracking.events.settings.SetUsernameEvent
-import com.waz.zclient.pages.main.profile.preferences.AccountPreferences
 import com.waz.zclient.tracking.GlobalTrackingController
 import com.waz.zclient.views.LoadingIndicatorView
 import com.waz.zclient.{FragmentHelper, R}
@@ -49,10 +47,7 @@ import scala.util.Try
 
 class ChangeHandleFragment extends DialogFragment with FragmentHelper {
   import ChangeHandleFragment._
-
   import Threading.Implicits.Ui
-
-  private var container = Option.empty[Container]
 
   private var usernameInputLayout:      TextInputLayout = _
   private var handleEditText:           AppCompatEditText = _
@@ -138,7 +133,6 @@ class ChangeHandleFragment extends DialogFragment with FragmentHelper {
 
                   case Right(_) =>
                     tracking.tagEvent(new SetUsernameEvent(inputHandle.length))
-                    container.foreach(_.onHandleChanged(inputHandle))
                     dismiss()
 
                   case Left(err) =>
@@ -161,7 +155,6 @@ class ChangeHandleFragment extends DialogFragment with FragmentHelper {
     override def onClick(v: View): Unit = {
       if (!cancelEnabled) {
         updateHandle(suggestedHandle)
-        container.foreach(_.onHandleChanged(suggestedHandle))
       }
       dismiss()
     }
@@ -213,16 +206,6 @@ class ChangeHandleFragment extends DialogFragment with FragmentHelper {
   override def onViewCreated(view: View, savedInstanceState: Bundle) = {
     Try(getDialog.getWindow).toOption.foreach(_.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE))
     super.onViewCreated(view, savedInstanceState)
-  }
-
-  override def onAttach(context: Context): Unit = {
-    super.onAttach(context)
-    container = Some(getParentFragment.asInstanceOf[AccountPreferences])
-  }
-
-  override def onDetach(): Unit = {
-    container = None
-    super.onDetach()
   }
 
   override def onStart() = {
@@ -299,10 +282,5 @@ object ChangeHandleFragment {
         }
       case _ => InvalidCharacters
     }
-  }
-
-  //TODO remove once AccountPreferences can listen to the changes by itself.
-  trait Container {
-    def onHandleChanged(handle: String): Unit
   }
 }
