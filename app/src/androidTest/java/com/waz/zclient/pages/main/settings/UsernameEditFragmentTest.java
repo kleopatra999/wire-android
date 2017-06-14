@@ -24,7 +24,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import com.waz.zclient.MainTestActivity;
 import com.waz.zclient.R;
-import com.waz.zclient.pages.main.profile.preferences.dialogs.ChangeUsernamePreferenceDialogFragment;
+import com.waz.zclient.preferences.dialogs.ChangeHandleFragment;
 import com.waz.zclient.testutils.FragmentTest;
 import com.waz.zclient.utils.StringUtils;
 import junit.framework.AssertionFailedError;
@@ -45,7 +45,7 @@ public class UsernameEditFragmentTest extends FragmentTest<MainTestActivity> {
     @Test
     public void assertInvalidCharactersDoNotAppear() throws InterruptedException {
         String currentUsername = "current_username";
-        attachFragment(ChangeUsernamePreferenceDialogFragment.newInstance(currentUsername, true), ChangeUsernamePreferenceDialogFragment.TAG);
+        attachFragment(ChangeHandleFragment.newInstance(currentUsername, true), ChangeHandleFragment.FragmentTag());
         Thread.sleep(400);
         onView(withId(R.id.acet__change_username)).perform(typeTextIntoFocusedView("?"));
         Thread.sleep(400);
@@ -56,7 +56,7 @@ public class UsernameEditFragmentTest extends FragmentTest<MainTestActivity> {
     public void assertLongUsernameShowsError() throws InterruptedException {
         String currentUsername = "currentusername";
         String typeText = "12345678912345678912345";
-        attachFragment(ChangeUsernamePreferenceDialogFragment.newInstance(currentUsername, true), ChangeUsernamePreferenceDialogFragment.TAG);
+        attachFragment(ChangeHandleFragment.newInstance(currentUsername, true), ChangeHandleFragment.FragmentTag());
         Thread.sleep(400);
         onView(withId(R.id.acet__change_username)).perform(typeTextIntoFocusedView(typeText));
         Thread.sleep(400);
@@ -66,7 +66,7 @@ public class UsernameEditFragmentTest extends FragmentTest<MainTestActivity> {
     @Test
     public void assertShortUsernameShowsError() throws InterruptedException {
         String currentUsername = "";
-        attachFragment(ChangeUsernamePreferenceDialogFragment.newInstance(currentUsername, true), ChangeUsernamePreferenceDialogFragment.TAG);
+        attachFragment(ChangeHandleFragment.newInstance(currentUsername, true), ChangeHandleFragment.FragmentTag());
         Thread.sleep(400);
         onView(withId(R.id.acet__change_username)).perform(typeTextIntoFocusedView("1"));
         Thread.sleep(400);
@@ -84,7 +84,7 @@ public class UsernameEditFragmentTest extends FragmentTest<MainTestActivity> {
     @Test
     public void assertInvalidUsernameCantBeSet() throws InterruptedException {
         String currentUsername = "";
-        attachFragment(ChangeUsernamePreferenceDialogFragment.newInstance(currentUsername, true), ChangeUsernamePreferenceDialogFragment.TAG);
+        attachFragment(ChangeHandleFragment.newInstance(currentUsername, true), ChangeHandleFragment.FragmentTag());
         Thread.sleep(400);
         onView(withId(R.id.acet__change_username)).perform(typeTextIntoFocusedView("1"));
         Thread.sleep(400);

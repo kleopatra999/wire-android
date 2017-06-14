@@ -39,12 +39,12 @@ import com.waz.zclient.pages.main.profile.camera.CameraContext;
 import com.waz.zclient.pages.main.profile.preferences.dialogs.AddEmailAndPasswordPreferenceDialogFragment;
 import com.waz.zclient.pages.main.profile.preferences.dialogs.AddPhoneNumberPreferenceDialogFragment;
 import com.waz.zclient.pages.main.profile.preferences.dialogs.ChangeEmailPreferenceDialogFragment;
-import com.waz.zclient.pages.main.profile.preferences.dialogs.ChangeUsernamePreferenceDialogFragment;
 import com.waz.zclient.pages.main.profile.preferences.dialogs.VerifyEmailPreferenceFragment;
 import com.waz.zclient.pages.main.profile.preferences.dialogs.VerifyPhoneNumberPreferenceFragment;
 import com.waz.zclient.preferences.BasePreferenceFragment;
 import com.waz.zclient.preferences.PreferencesActivity;
 import com.waz.zclient.preferences.dialogs.AccentColorPickerFragment;
+import com.waz.zclient.preferences.dialogs.ChangeHandleFragment;
 import com.waz.zclient.preferences.dialogs.PicturePreference;
 import com.waz.zclient.tracking.GlobalTrackingController;
 import com.waz.zclient.ui.utils.TextViewUtils;
@@ -60,7 +60,7 @@ public class AccountPreferences extends BasePreferenceFragment implements Profil
                                                                           AddEmailAndPasswordPreferenceDialogFragment.Container,
                                                                           ChangeEmailPreferenceDialogFragment.Container,
                                                                           AddPhoneNumberPreferenceDialogFragment.Container,
-                                                                          ChangeUsernamePreferenceDialogFragment.Container,
+                                                                          ChangeHandleFragment.Container,
                                                                           AccentColorObserver {
 
     public static final String TAG = AccountPreferences.class.getName();
@@ -428,9 +428,8 @@ public class AccountPreferences extends BasePreferenceFragment implements Profil
         ((BaseActivity) getActivity()).injectJava(GlobalTrackingController.class).tagEvent(new EditedUsernameEvent());
         getChildFragmentManager().beginTransaction()
                                  .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                                 .add(ChangeUsernamePreferenceDialogFragment.newInstance(currentUsername, cancellable),
-                                      ChangeUsernamePreferenceDialogFragment.TAG)
-                                 .addToBackStack(ChangeUsernamePreferenceDialogFragment.TAG)
+                                 .add(ChangeHandleFragment.newInstance(currentUsername, cancellable), ChangeHandleFragment.FragmentTag())
+                                 .addToBackStack(ChangeHandleFragment.FragmentTag())
                                  .commit();
     }
 
@@ -454,7 +453,7 @@ public class AccountPreferences extends BasePreferenceFragment implements Profil
     }
 
     @Override
-    public void onUsernameChanged(String username) {
-        onMyUsernameHasChanged(username);
+    public void onHandleChanged(String handle) {
+        onMyUsernameHasChanged(handle);
     }
 }
