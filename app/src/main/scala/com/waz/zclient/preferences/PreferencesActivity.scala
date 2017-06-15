@@ -172,7 +172,7 @@ class PreferencesActivity extends BaseActivity
       case k if k == getString(R.string.pref_options_screen_key)        => OptionsPreferences.newInstance(rootKey, extras)
       case k if k == getString(R.string.pref_support_screen_key)        => SupportPreferences.newInstance(rootKey, extras)
       case k if k == getString(R.string.pref_advanced_screen_key)       => AdvancedPreferences.newInstance(rootKey, extras)
-      case k if k == getString(R.string.pref_developer_screen_key)      => DeveloperPreferenceFragment.newInstance(rootKey, extras)
+      case k if k == getString(R.string.pref_developer_screen_key)      => DeveloperPreferences.newInstance(rootKey, extras)
       case k if k == getString(R.string.pref_devices_screen_key)        => DevicesPreferences.newInstance(rootKey, extras)
       case k if k == getString(R.string.pref_device_details_screen_key) => DeviceDetailPreferences.newInstance(rootKey, extras)
       case _                                                            => RootPreferences.newInstance(rootKey, extras)
