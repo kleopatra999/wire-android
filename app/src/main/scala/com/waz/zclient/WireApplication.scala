@@ -21,9 +21,11 @@ import android.os.Build
 import android.renderscript.RenderScript
 import android.support.multidex.MultiDexApplication
 import com.waz.ZLog.ImplicitTag._
-import com.waz.ZLog.verbose
-import com.waz.api.{NetworkMode, ZMessagingApi, ZMessagingApiFactory}
+import com.waz.ZLog.{debug, verbose}
+import com.waz.api
+import com.waz.api.{NetworkMode, ZMessagingApi, ZMessagingApiFactory, ZmsVersion}
 import com.waz.content.GlobalPreferences
+import com.waz.log.InternalLog
 import com.waz.service.{MediaManagerService, NetworkModeService, ZMessaging}
 import com.waz.utils.events.{EventContext, Signal, Subscription}
 import com.waz.zclient.api.scala.ScalaStoreFactory
@@ -149,6 +151,11 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
 
   override def onCreate(): Unit = {
     super.onCreate()
+
+    if (ZmsVersion.DEBUG) {
+      InternalLog.init(getApplicationContext.getApplicationInfo.dataDir)
+    }
+
     verbose("onCreate")
     controllerFactory = new DefaultControllerFactory(getApplicationContext)
 
@@ -183,6 +190,9 @@ class WireApplication extends MultiDexApplication with WireContext with Injectab
     } else {
       inject[RenderScript].destroy()
     }
+
+    InternalLog.flush()
+
     super.onTerminate()
   }
 }
